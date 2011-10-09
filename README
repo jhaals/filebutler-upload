@@ -9,14 +9,6 @@ Client
         pip install -r requirements.txt
 *   configure ppupload.conf and place it under ~/.ppupload.conf
 
-Server
-*   Install python requirements using pip
-        pip install -r requirements.txt
-*   configure ppupload.conf and place it under ~/.ppupload.conf
-*   create the directory specified as storage_path in ppupload.conf
-
-Upload files!
-
 
 Usage: ppupload.py -h
 

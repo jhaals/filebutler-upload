@@ -5,12 +5,10 @@ import os
 import sys
 
 # Third party
-from poster.encode import multipart_encode
 import requests
 
 # Local
 import clipboard
-from utils import ProgressMeter
 
 
 class Application(object):
@@ -66,32 +64,29 @@ class Application(object):
             sys.exit('Could not open file: ' + filepath)
 
         # Prepare the data
-        data, headers = multipart_encode({
-                'file': upload_file,
+        headers = {'Accept': 'application/json'}
+        files = {'file': upload_file}
+        data = {
                 'username': self.config.get('settings', 'username'),
                 'password': self.config.get('settings', 'password'),
                 'download_password': self.options.password,
                 'one_time_download': '1' if self.options.onetime else '0',
                 'expire': self.options.lifetime
-            },
-            cb = ProgressMeter()
-        )
+            }
 
         response = requests.post(
             self.config.get('settings', 'upload_url'),
             data=data,
-            headers=headers
+            files=files, headers=headers
         )
 
         if response:
-            # TODO: this should really be parsed and no text should be copied
-            # if r.content contains anything else then a http address.
-            clipboard.copy(response.content)
+            clipboard.copy(response.json['message'])
 
-            print response.content
+            print response.json['message']
             return 0
 
         else:
             print 'Request failed with status code:', response.status_code
+            print response.json['message']
             return 1
-

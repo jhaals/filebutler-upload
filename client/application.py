@@ -20,9 +20,9 @@ class Application(object):
     def read_configuration(self):
         # Search for the configuration file in the following paths.
         paths = [
-            os.path.expanduser('~/.ppupload.conf'),
-            'ppupload.conf',
-            '/etc/ppupload.conf'
+            os.path.expanduser('~/.filebutler-upload.conf'),
+            'filebutler-upload.conf',
+            '/etc/filebutler-upload.conf'
         ]
 
         self.config = RawConfigParser()
@@ -80,13 +80,11 @@ class Application(object):
             files=files, headers=headers
         )
 
-        if response:
+        if response.status_code is 200:
             clipboard.copy(response.json['message'])
-
             print response.json['message']
             return 0
 
         else:
-            print 'Request failed with status code:', response.status_code
-            print response.json['message']
+            print 'Failed to upload file. Error %s: %s' % (response.status_code, response.json['message'])
             return 1

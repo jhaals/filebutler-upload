@@ -22,16 +22,16 @@ class Application(object):
         while 1:
 
             username = raw_input('Username: ')
-            if len(username) is 0:
+            if not len(username):
                 continue
 
             password = raw_input('Password(clear text): ')
-            if len(password) is 0:
+            if not len(password):
                 continue
 
             print 'Upload url with trailing slash. eg: http://upload.mysite.com/'
             url = raw_input('url: ')
-            if len(url) is 0:
+            if not len(url):
                 continue
 
             print 'Username: %s' % username

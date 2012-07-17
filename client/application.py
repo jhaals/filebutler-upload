@@ -17,6 +17,39 @@ class Application(object):
         self.config = None
         self.options = None
 
+    def configuration_tutorial(self):
+        print "Filebutler couldn't detect the configuration file, let's create one together!"
+        while 1:
+
+            username = raw_input('Username: ')
+            if len(username) is 0:
+                continue
+
+            password = raw_input('Password(clear text): ')
+            if len(password) is 0:
+                continue
+
+            print 'Upload url with trailing slash. eg: http://upload.mysite.com/'
+            url = raw_input('url: ')
+            if len(url) is 0:
+                continue
+
+            print 'Username: %s' % username
+            print 'Password: %s' % password
+            print 'Upload URL: %s' % url
+            answer = raw_input('Is this information correct? [y/n]: ')
+
+            if answer is 'y':
+                config_path = os.path.expanduser('~/.filebutler-upload.conf')
+                print 'Writing config file to %s' % config_path
+                with open(config_path, 'w') as f:
+                    f.write('[settings]\n')
+                    f.write('username = %s\n' % username)
+                    f.write('password = %s\n' % password)
+                    f.write('upload_url = %s\n' % url)
+            break
+        self.read_configuration()
+
     def read_configuration(self):
         # Search for the configuration file in the following paths.
         paths = [
@@ -28,7 +61,7 @@ class Application(object):
         self.config = RawConfigParser()
 
         if not self.config.read(paths):
-            sys.exit("Couldn't read configuration file")
+            self.configuration_tutorial()
 
     def parse_arguments(self):
         parser = OptionParser('usage: %prog -h', version="%prog 0.1")

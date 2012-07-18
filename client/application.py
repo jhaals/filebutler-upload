@@ -39,7 +39,7 @@ class Application(object):
             print 'Upload URL: %s' % url
             answer = raw_input('Is this information correct? [y/n]: ')
 
-            if answer is 'y':
+            if answer == 'y':
                 config_path = os.path.expanduser('~/.filebutler-upload.conf')
                 print 'Writing config file to %s' % config_path
                 with open(config_path, 'w') as f:

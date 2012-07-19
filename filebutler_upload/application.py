@@ -8,7 +8,7 @@ import sys
 import requests
 
 # Local
-import clipboard
+from filebutler_upload import clipboard
 
 
 class Application(object):

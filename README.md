@@ -5,17 +5,15 @@ Upload script to [python-filebutler](http://github.com/jhaals/python-filebutler 
 
 Install
 ---
+Download filebutler via pip
 
-Install python requirements:
+    $ pip install -e "git+https://github.com/JHaals/filebutler-upload#egg=filebutler_upload"
 
-        pip install -r requirements.txt
-Configure filebutler-upload.conf and place it under ~/.filebutler-upload.conf or /etc/
-
-It's recommended to place an alias for filebutler in your .bashrc or similar.
+Quick configuration tutorial will be prompted upon first run
 
 Usage
 ---
-    filebutler.py <file> <options>
+    $ filebutler.py <file> <options>
 
 Avaliable options:
 

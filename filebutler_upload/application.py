@@ -3,12 +3,28 @@ from ConfigParser import RawConfigParser
 from optparse import OptionParser
 import os
 import sys
+import tempfile
+import zipfile
 
 # Third party
 import requests
 
 # Local
 from filebutler_upload import clipboard
+
+
+def compress(path):
+    # Create temporary file
+    fd, name = tempfile.mkstemp(suffix='.zip')
+
+    zip = zipfile.ZipFile(name, 'w')
+
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            zip.write(os.path.join(root, file))
+
+    zip.close()
+    return name
 
 
 class Application(object):
@@ -88,8 +104,9 @@ class Application(object):
 
         filepath = self.args[0]
 
-        if not os.path.isfile(filepath):
-            sys.exit('Does not exist: ' + filepath)
+        if os.path.isdir(filepath):
+            # Compress directory
+            filepath = compress(filepath)
 
         try:
             upload_file = open(filepath, 'rb')
@@ -119,5 +136,7 @@ class Application(object):
             return 0
 
         else:
-            print 'Failed to upload file. Error %s: %s' % (response.status_code, response.json['message'])
+            print 'Failed to upload file. Error %s: %s' % (
+                    response.status_code,
+                    response.json['message'])
             return 1

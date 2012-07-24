@@ -1,6 +1,6 @@
 # Standard library
 from ConfigParser import RawConfigParser
-from optparse import OptionParser
+from argparse import ArgumentParser
 import os
 import sys
 import tempfile
@@ -10,7 +10,7 @@ import zipfile
 import requests
 
 # Local
-from filebutler_upload import clipboard
+from . import clipboard
 
 
 def compress(path):
@@ -29,7 +29,6 @@ def compress(path):
 
 class Application(object):
     def __init__(self):
-        self.args = []
         self.config = None
         self.options = None
 
@@ -80,29 +79,30 @@ class Application(object):
             self.configuration_tutorial()
 
     def parse_arguments(self):
-        parser = OptionParser('usage: %prog -h', version="%prog 0.1")
+        parser = ArgumentParser()
 
-        parser.add_option("--onetime", "-1", help='One time download', \
-            default=False, action='store_true')
+        # Optional arguments
+        parser.add_argument('-1', '--onetime', action='store_true',
+            help='One time download.')
 
-        parser.add_option("--lifetime", "-l",
-            choices=('', '1h', '1d', '1w', '1m'), default='',
+        parser.add_argument('-l', '--lifetime',
+            choices=['1h', '1d', '1w', '1m'],
             help='Lifetime: 1h, 1d, 1w, 1m (hour/day/week/month). ' \
-            'Default lifetime is unlimited')
+                 'Default lifetime is forever.')
 
-        parser.add_option("--password", "-p", default='',
-            help='Download password')
+        parser.add_argument('-p', '--password',
+            help='Make this a password protected file.')
 
-        self.options, self.args = parser.parse_args()
+        # Mandatory arguments
+        parser.add_argument('path')
 
-        if not len(self.args):
-            parser.error('Please specify atleast one file to upload.')
+        self.options = parser.parse_args()
 
     def run(self):
         self.read_configuration()
         self.parse_arguments()
 
-        filepath = self.args[0]
+        filepath = self.options.path
 
         if os.path.isdir(filepath):
             # Compress directory

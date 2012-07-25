@@ -11,6 +11,7 @@ import requests
 
 # Local
 from . import clipboard
+from .filehandler import Filemanager
 
 
 def compress(path):
@@ -80,63 +81,102 @@ class Application(object):
 
     def parse_arguments(self):
         parser = ArgumentParser()
+        subparsers = parser.add_subparsers()
+        available_commands = []
 
-        # Optional arguments
-        parser.add_argument('-1', '--onetime', action='store_true',
+        # Upload
+        parser_upload = subparsers.add_parser('upload')
+        parser_upload.add_argument('-1', '--onetime', action='store_const',
+            const='1', default='0',
             help='One time download.')
 
-        parser.add_argument('-l', '--lifetime',
-            choices=['1h', '1d', '1w', '1m'],
+        parser_upload.add_argument('-l', '--lifetime',
+            choices=['1h', '1d', '1w', '1m'], default='',
             help='Lifetime: 1h, 1d, 1w, 1m (hour/day/week/month). ' \
                  'Default lifetime is forever.')
 
-        parser.add_argument('-p', '--password',
+        parser_upload.add_argument('-p', '--password', default='',
             help='Make this a password protected file.')
 
-        # Mandatory arguments
-        parser.add_argument('path')
+        parser_upload.add_argument('path')
+        parser_upload.set_defaults(command='upload')
+        available_commands.append('upload')
 
-        self.options = parser.parse_args()
+        # List
+        parser_list = subparsers.add_parser('list')
+        parser_list.set_defaults(command='list')
+        available_commands.append('list')
+
+        # Delete
+        parser_delete = subparsers.add_parser('delete')
+        parser_delete.add_argument('hash', help='File to delete')
+        parser_delete.set_defaults(command='delete')
+        available_commands.append('delete')
+
+        arguments = sys.argv[1:]
+
+        if arguments and not arguments[0] in available_commands:
+            arguments = ['upload'] + arguments
+
+        self.options = parser.parse_args(arguments)
 
     def run(self):
         self.read_configuration()
         self.parse_arguments()
 
-        filepath = self.options.path
-
-        if os.path.isdir(filepath):
-            # Compress directory
-            filepath = compress(filepath)
-
-        try:
-            upload_file = open(filepath, 'rb')
-        except IOError:
-            sys.exit('Could not open file: ' + filepath)
-
-        # Prepare the data
-        headers = {'Accept': 'application/json'}
-        files = {'file': upload_file}
-        data = {
-                'username': self.config.get('settings', 'username'),
-                'password': self.config.get('settings', 'password'),
-                'download_password': self.options.password,
-                'one_time_download': '1' if self.options.onetime else '0',
-                'expire': self.options.lifetime
-            }
-
-        response = requests.post(
+        fm = Filemanager(
             self.config.get('settings', 'upload_url'),
-            data=data,
-            files=files, headers=headers
+            self.config.get('settings', 'username'),
+            self.config.get('settings', 'password')
         )
 
-        if response.status_code is 200:
-            clipboard.copy(response.json['message'])
-            print response.json['message']
+        if self.options.command == 'upload':
+            filepath = self.options.path
+
+            if os.path.isdir(filepath):
+                filepath = compress(filepath)
+
+            try:
+                upload_file = open(filepath, 'rb')
+            except IOError:
+                print 'Could not open file:', filepath
+                return 1
+
+            response = fm.upload(
+                upload_file,
+                self.options.password,
+                self.options.onetime,
+                self.options.lifetime
+            )
+
+            if response.status_code != requests.codes.ok:
+                print 'Failed to upload file. Error {0}: {1}'.format(
+                    response.status_code,
+                    response.json['message']
+                )
+
+                return 1
+
+            url = response.json['message']
+            clipboard.copy(url)
+            print url
+
             return 0
 
-        else:
-            print 'Failed to upload file. Error %s: %s' % (
-                    response.status_code,
-                    response.json['message'])
-            return 1
+        if self.options.command == 'list':
+            response = fm.list()
+
+            for hash, name in response.iteritems():
+                print hash, name
+                return 0
+
+        if self.options.command == 'delete':
+            response = fm.delete(self.options.hash)
+
+            if response.status_code != requests.codes.ok:
+                return 1
+
+            return 0
+
+        print 'Unrecognized command'
+        return 1

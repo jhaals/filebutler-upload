@@ -1,7 +1,4 @@
 import requests
-#import os
-#from ConfigParser import RawConfigParser
-#from text_table import TextTable
 
 
 class Filemanager:
@@ -37,9 +34,9 @@ class Filemanager:
             pass
 
         data = {
-                'username': self.username,
-                'password': self.password,
-            }
+            'username': self.username,
+            'password': self.password,
+        }
 
         response = requests.post(
             self.url + hash + '/delete',
@@ -54,36 +51,18 @@ class Filemanager:
 
         files = {'file': upload_file}
         data = {
-                'username': self.config.get('settings', 'username'),
-                'password': self.config.get('settings', 'password'),
-                'download_password': self.options.password,
-                'one_time_download': '1' if self.options.onetime else '0',
-                'expire': self.options.lifetime
+                'username': self.username,
+                'password': self.password,
+                'download_password': download_password,
+                'one_time_download': '1' if one_time_download else '0',
+                'expire': expire
             }
 
         response = requests.post(
             self.url,
             data=data,
-            files=files, headers=self.headers
+            files=files,
+            headers=self.headers
         )
 
         return response
-
-
-# For testing, remove when finished.
-#config = RawConfigParser()
-#config.read(os.path.expanduser('~/.filebutler-upload.conf'))
-
-#username = config.get('settings', 'username')
-#password = config.get('settings', 'password')
-#url = config.get('settings', 'upload_url')
-
-#fm = Filemanager(url, username, password)
-
-
-#t = TextTable((40, 'Download hash'), (35, 'Filename'))
-#for hash, filename in fm.list().iteritems():
-#    t.row(hash, filename)
-#print t.draw()
-
-print fm.delete('a13170f4cdbd96743e18126306ddba484785ba6b')

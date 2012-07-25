@@ -168,13 +168,11 @@ class Application(object):
 
             for hash, name in response.iteritems():
                 print hash, name
-                return 0
+
+            return 0
 
         if self.options.command == 'delete':
             response = fm.delete(self.options.hash)
-
-            if response.status_code != requests.codes.ok:
-                return 1
 
             return 0
 

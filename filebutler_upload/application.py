@@ -86,8 +86,7 @@ class Application(object):
 
         # Upload
         parser_upload = subparsers.add_parser('upload')
-        parser_upload.add_argument('-1', '--onetime', action='store_const',
-            const='1', default='0',
+        parser_upload.add_argument('-1', '--onetime', action='store_true',
             help='One time download.')
 
         parser_upload.add_argument('-l', '--lifetime',

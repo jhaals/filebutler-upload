@@ -113,8 +113,11 @@ class Application(object):
         available_commands.append('delete')
 
         arguments = sys.argv[1:]
+        positional = filter(
+            lambda x: not x.startswith('-'), arguments
+        )
 
-        if arguments and not arguments[0] in available_commands:
+        if len(positional) == 1 and not positional[0] in available_commands:
             arguments = ['upload'] + arguments
 
         self.options = parser.parse_args(arguments)

@@ -1,6 +1,7 @@
 # Standard library
 from ConfigParser import RawConfigParser
 from argparse import ArgumentParser
+import json
 import os
 import sys
 import tempfile
@@ -144,22 +145,24 @@ class Application(object):
                 print 'Could not open file:', filepath
                 return 1
 
-            response = fm.upload(
+            status_code, response = fm.upload(
                 upload_file,
                 self.options.password,
                 self.options.onetime,
                 self.options.lifetime
             )
 
-            if response.status_code != requests.codes.ok:
+            response = json.loads(response)
+
+            if status_code != 200:
                 print 'Failed to upload file. Error {0}: {1}'.format(
-                    response.status_code,
-                    response.json['message']
+                    status_code,
+                    response['message']
                 )
 
                 return 1
 
-            url = response.json['message']
+            url = response['message']
             clipboard.copy(url)
             print url
 

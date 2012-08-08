@@ -1,5 +1,6 @@
 import requests
-
+from httputils import post
+from utils import ProgressBar
 
 class Filemanager:
     def __init__(self, url, username, password):
@@ -46,23 +47,17 @@ class Filemanager:
 
         return response.text
 
-    def upload(self, upload_file,
-        download_password, one_time_download, expire):
-
-        files = {'file': upload_file}
+    def upload(self, upload_file, download_password, one_time_download, expire):
         data = {
-                'username': self.username,
-                'password': self.password,
-                'download_password': download_password,
-                'one_time_download': '1' if one_time_download else '0',
-                'expire': expire
-            }
+            'username': self.username,
+            'password': self.password,
+            'download_password': download_password,
+            'one_time_download': '1' if one_time_download else '0',
+            'expire': expire,
+            'file': upload_file
+        }
 
-        response = requests.post(
-            self.url,
-            data=data,
-            files=files,
-            headers=self.headers
-        )
+        pb = ProgressBar(upload_file.name, '{filename} {percent:.1%} {speed:.1f} mbps')
+        status, response = post(self.url, data, self.headers, callback=pb)
 
-        return response
+        return status, response

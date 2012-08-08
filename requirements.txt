@@ -1,2 +1,2 @@
 requests
-poster
+-e git+https://github.com/DrMegahertz/multipart-encode#egg=multipart-encode

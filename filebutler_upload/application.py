@@ -169,9 +169,19 @@ class Application(object):
             return 0
 
         if self.options.command == 'list':
-            response = fm.list()
+            status_code, response = fm.list()
 
-            for hash, name in response.iteritems():
+            response = json.loads(response)
+
+            if status_code != 200:
+                print 'Failed to upload file. Error {0}: {1}'.format(
+                    status_code,
+                    response['message']
+                )
+
+                return 1
+
+            for hash, name in response['message'].iteritems():
                 print hash, name
 
             return 0

@@ -1,6 +1,7 @@
 import requests
 from httputils import post
 from utils import ProgressBar
+from urlparse import urljoin
 
 class Filemanager:
     def __init__(self, url, username, password):
@@ -18,16 +19,9 @@ class Filemanager:
                 'password': self.password
             }
 
-        response = requests.post(
-            self.url + 'files',
-            data=data,
-            headers=self.headers
-        )
+        status, response = post(urljoin(self.url, 'files'), data, self.headers)
 
-        if response.status_code == 200:
-            return response.json['message']
-        else:
-            return {}
+        return status, response
 
     def delete(self, hash):
         ''' delete specified hash '''

@@ -24,7 +24,7 @@ setup(
     ],
     entry_points = {
         'console_scripts': [
-            'filebutler = filebutler:main'
+            'filebutler = filebutler_upload.main:main'
         ]
     },
 )

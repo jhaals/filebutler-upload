@@ -14,8 +14,9 @@ class ProgressBar(object):
     def __call__(self, current, total):
         self.progress = current
         self.total = total
+        final_update = current == total
 
-        if datetime.now() - self.time_updated > timedelta(seconds=0.5):
+        if datetime.now() - self.time_updated > timedelta(seconds=0.5) or final_update:
             output = self.fmt.format(
                 filename=self.filename,
                 percent=self.get_percent(),
@@ -23,6 +24,10 @@ class ProgressBar(object):
             )
 
             sys.stdout.write('\r' + output)
+
+            if final_update:
+                sys.stdout.write('\n')
+
             sys.stdout.flush()
             self.time_updated = datetime.now()
 

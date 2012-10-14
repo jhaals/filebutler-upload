@@ -1,4 +1,3 @@
-import requests
 from httputils import post
 from utils import ProgressBar
 from urlparse import urljoin

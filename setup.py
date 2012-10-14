@@ -11,7 +11,6 @@ setup(
     description='',
     packages=['filebutler_upload'],
     install_requires=[
-        'requests==0.8.1',
         'multipart-encode==0.1.0',
     ],
     classifiers=[

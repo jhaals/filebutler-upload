@@ -184,7 +184,16 @@ class Application(object):
             return 0
 
         if self.options.command == 'delete':
-            response = fm.delete(self.options.hash)
+            status_code, response = fm.delete(self.options.hash)
+
+            response = json.loads(response)
+
+            if status_code != 200:
+                print 'Failed to delete file. Error {0}: {1}'.format(
+                    status_code,
+                    response['message']
+                )
+                return 1
 
             return 0
 

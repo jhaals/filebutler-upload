@@ -33,13 +33,11 @@ class Filemanager:
             'password': self.password,
         }
 
-        response = requests.post(
-            self.url + hash + '/delete',
-            data=data,
-            headers=self.headers
-        )
+        status, response = post(self.url + hash + '/delete',
+                data = data,
+                headers=self.headers)
 
-        return response.text
+        return status, response
 
     def upload(self, upload_file, download_password, one_time_download, expire):
         data = {

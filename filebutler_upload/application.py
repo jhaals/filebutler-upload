@@ -7,9 +7,6 @@ import sys
 import tempfile
 import zipfile
 
-# Third party
-import requests
-
 # Local
 from . import clipboard
 from .filehandler import Filemanager

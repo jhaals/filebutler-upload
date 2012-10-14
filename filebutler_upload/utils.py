@@ -11,10 +11,6 @@ class ProgressBar(object):
         self.time_started = datetime.now()
         self.time_updated = self.time_started
 
-    def add_progress(self, other):
-        self.progress += other
-        return self
-
     def __call__(self, current, total):
         self.progress = current
         self.total = total

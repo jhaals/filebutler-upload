@@ -35,12 +35,13 @@ def request(method, url, data, headers, callback=None):
 
     # Send body
     bytes_sent = 0
+    bytes_total = int(encoded_data_headers['Content-Length'])
     for chunk in encoded_data:
         request.send(chunk)
         bytes_sent += len(chunk)
 
-        if callback is not None:
-            callback(bytes_sent, encoded_data_headers['Content-Length'])
+        if callable(callback):
+            callback(bytes_sent, bytes_total)
 
     # TODO: Wrap the response in a container to allow chunked reading.
     response = request.getresponse()
@@ -54,4 +55,3 @@ def request(method, url, data, headers, callback=None):
 
 get = partial(request, 'GET')
 post = partial(request, 'POST')
-

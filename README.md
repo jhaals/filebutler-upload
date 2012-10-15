@@ -13,7 +13,7 @@ Quick configuration tutorial will be prompted upon first run
 
 Usage
 ---
-    $ filebutler.py <file> <options>
+    $ filebutler.py <file/directory*> <options>
 
 Avaliable options:
 
@@ -25,3 +25,6 @@ Avaliable options:
                 (hour/day/week/month). Default lifetime is unlimited
     -p PASSWORD, --password=PASSWORD
                 Download password(optional)
+
+
+* Directories will automatically be zip-compressed before upload

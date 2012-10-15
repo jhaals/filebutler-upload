@@ -5,10 +5,6 @@ import sys
 from filebutler_upload.application import Application
 
 
-def main():
+if __name__ == '__main__':
     instance = Application()
     sys.exit(instance.run())
-
-
-if __name__ == '__main__':
-    main()

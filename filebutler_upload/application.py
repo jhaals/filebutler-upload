@@ -80,7 +80,6 @@ class Application(object):
     def parse_arguments(self):
         parser = ArgumentParser()
         subparsers = parser.add_subparsers()
-        available_commands = []
 
         # Upload
         parser_upload = subparsers.add_parser('upload')
@@ -97,25 +96,22 @@ class Application(object):
 
         parser_upload.add_argument('path')
         parser_upload.set_defaults(command='upload')
-        available_commands.append('upload')
 
         # List
         parser_list = subparsers.add_parser('list')
         parser_list.set_defaults(command='list')
-        available_commands.append('list')
 
         # Delete
         parser_delete = subparsers.add_parser('delete')
         parser_delete.add_argument('hash', help='File to delete')
         parser_delete.set_defaults(command='delete')
-        available_commands.append('delete')
 
         arguments = sys.argv[1:]
         positional = filter(
             lambda x: not x.startswith('-'), arguments
         )
 
-        if len(positional) >= 1 and not positional[0] in available_commands:
+        if len(positional) >= 1 and not positional[0] in subparsers.choices.keys():
             arguments = ['upload'] + arguments
 
         self.options = parser.parse_args(arguments)

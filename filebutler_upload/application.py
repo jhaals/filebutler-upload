@@ -164,9 +164,8 @@ class Application(object):
 
             return 1
 
-        for hash, name in response['message'].iteritems():
-            print hash, name
-
+        for hash, data in response['message'].iteritems():
+            print hash, data['filename']
         return 0
 
     def do_delete(self, fm):

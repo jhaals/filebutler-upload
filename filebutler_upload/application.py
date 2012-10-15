@@ -95,16 +95,16 @@ class Application(object):
             help='Make this a password protected file.')
 
         parser_upload.add_argument('path')
-        parser_upload.set_defaults(command='upload')
+        parser_upload.set_defaults(command=self.do_upload)
 
         # List
         parser_list = subparsers.add_parser('list')
-        parser_list.set_defaults(command='list')
+        parser_list.set_defaults(command=self.do_list)
 
         # Delete
         parser_delete = subparsers.add_parser('delete')
         parser_delete.add_argument('hash', help='File to delete')
-        parser_delete.set_defaults(command='delete')
+        parser_delete.set_defaults(command=self.do_delete)
 
         arguments = sys.argv[1:]
         positional = filter(
@@ -116,6 +116,73 @@ class Application(object):
 
         self.options = parser.parse_args(arguments)
 
+    def do_upload(self, fm):
+        filepath = self.options.path
+
+        if os.path.isdir(filepath):
+            filepath = compress(filepath)
+
+        try:
+            upload_file = open(filepath, 'rb')
+        except IOError:
+            print 'Could not open file:', filepath
+            return 1
+
+        status_code, response = fm.upload(
+            upload_file,
+            self.options.password,
+            self.options.onetime,
+            self.options.lifetime
+        )
+
+        response = json.loads(response)
+
+        if status_code != 200:
+            print 'Failed to upload file. Error {0}: {1}'.format(
+                status_code,
+                response['message']
+            )
+
+            return 1
+
+        url = response['message']
+        clipboard.copy(url)
+        print url
+
+        return 0
+
+    def do_list(self, fm):
+        status_code, response = fm.list()
+
+        response = json.loads(response)
+
+        if status_code != 200:
+            print 'Failed to upload file. Error {0}: {1}'.format(
+                status_code,
+                response['message']
+            )
+
+            return 1
+
+        for hash, name in response['message'].iteritems():
+            print hash, name
+
+        return 0
+
+    def do_delete(self, fm):
+        status_code, response = fm.delete(self.options.hash)
+
+        response = json.loads(response)
+
+        if status_code != 200:
+            print 'Failed to delete file. Error {0}: {1}'.format(
+                status_code,
+                response['message']
+            )
+            return 1
+
+        return 0
+
     def run(self):
         self.read_configuration()
         self.parse_arguments()
@@ -126,72 +193,4 @@ class Application(object):
             self.config.get('settings', 'password')
         )
 
-        if self.options.command == 'upload':
-            filepath = self.options.path
-
-            if os.path.isdir(filepath):
-                filepath = compress(filepath)
-
-            try:
-                upload_file = open(filepath, 'rb')
-            except IOError:
-                print 'Could not open file:', filepath
-                return 1
-
-            status_code, response = fm.upload(
-                upload_file,
-                self.options.password,
-                self.options.onetime,
-                self.options.lifetime
-            )
-
-            response = json.loads(response)
-
-            if status_code != 200:
-                print 'Failed to upload file. Error {0}: {1}'.format(
-                    status_code,
-                    response['message']
-                )
-
-                return 1
-
-            url = response['message']
-            clipboard.copy(url)
-            print url
-
-            return 0
-
-        if self.options.command == 'list':
-            status_code, response = fm.list()
-
-            response = json.loads(response)
-
-            if status_code != 200:
-                print 'Failed to upload file. Error {0}: {1}'.format(
-                    status_code,
-                    response['message']
-                )
-
-                return 1
-
-            for hash, name in response['message'].iteritems():
-                print hash, name
-
-            return 0
-
-        if self.options.command == 'delete':
-            status_code, response = fm.delete(self.options.hash)
-
-            response = json.loads(response)
-
-            if status_code != 200:
-                print 'Failed to delete file. Error {0}: {1}'.format(
-                    status_code,
-                    response['message']
-                )
-                return 1
-
-            return 0
-
-        print 'Unrecognized command'
-        return 1
+        return self.options.command(fm)

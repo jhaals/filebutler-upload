@@ -157,7 +157,7 @@ class Application(object):
         response = json.loads(response)
 
         if status_code != 200:
-            print 'Failed to upload file. Error {0}: {1}'.format(
+            print 'Failed to list file. Error {0}: {1}'.format(
                 status_code,
                 response['message']
             )

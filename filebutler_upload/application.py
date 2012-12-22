@@ -1,11 +1,12 @@
 # Standard library
 from ConfigParser import RawConfigParser
 from argparse import ArgumentParser
+from contextlib import closing
+from zipfile import ZipFile
 import json
 import os
 import sys
 import tempfile
-import zipfile
 
 # Local
 from . import clipboard
@@ -13,17 +14,28 @@ from .filehandler import Filemanager
 
 
 def compress(path):
-    # Create temporary file
-    fd, name = tempfile.mkstemp(suffix='.zip')
+    # Make sure that we work with an absolute path
+    path = os.path.abspath(path)
 
-    zip = zipfile.ZipFile(name, 'w')
+    _fd, tempfile_path = tempfile.mkstemp()
 
-    for root, dirs, files in os.walk(path):
-        for file in files:
-            zip.write(os.path.join(root, file))
+    # Get the parent of the given directory. This will be used to give the
+    # archived files their relative names.
+    parent, _directory = os.path.split(path)
 
-    zip.close()
-    return name
+    with closing(ZipFile(tempfile_path, 'w')) as zipfile:
+
+        # Traverse recursively through the target directory.
+        for root, dirs, files in os.walk(path):
+
+            # Strip the preceding path to the target directory
+            archive_root = root.replace(parent, '')
+
+            for filename in files:
+                archive_filename = os.path.join(archive_root, filename)
+                zipfile.write(os.path.join(root, filename), archive_filename)
+
+    return tempfile_path
 
 
 class Application(object):
